@@ -48,7 +48,7 @@ class RenameCommand : public AbstractCommand
     QString mCollectionNameArg;
     bool mDryRun;
 
-  private Q_SLOTS: 
+  private Q_SLOTS:
     void onCollectionFetched( KJob *job );
     void onCollectionModified( KJob *job );
 };
