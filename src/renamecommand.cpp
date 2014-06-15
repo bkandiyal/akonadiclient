@@ -70,7 +70,7 @@ int RenameCommand::initCommand(KCmdLineArgs* parsedArgs)
   mResolveJob = new CollectionResolveJob( collectionArg, this );
   if (!mResolveJob->hasUsableInput())
   {
-    emit error( ki18nc( "@info:shell", 
+    emit error( ki18nc( "@info:shell",
                         "Invalid collection argument '%1', '%2'" )
                   .subs( collectionArg )
                   .subs( mResolveJob->errorString()).toString() );
