@@ -30,8 +30,8 @@ class RenameCommand : public AbstractCommand
   Q_OBJECT
 
   public:
-    explicit RenameCommand(QObject* parent = 0);
-    ~RenameCommand();
+    explicit RenameCommand(QObject *parent = 0);
+    virtual ~RenameCommand();
 
     QString name() const { return QLatin1String("rename"); }
 
@@ -39,17 +39,17 @@ class RenameCommand : public AbstractCommand
     void start();
 
   protected:
-    virtual int initCommand(KCmdLineArgs* parsedArgs);
-    virtual void setupCommandOptions(KCmdLineOptions& options);
+    virtual int initCommand(KCmdLineArgs *parsedArgs);
+    virtual void setupCommandOptions(KCmdLineOptions &options);
 
   private:
-    CollectionResolveJob *mResolveJob;
-    QString mCollectionNameArg;
     bool mDryRun;
+    CollectionResolveJob *mResolveJob;
+    QString mNewCollectionNameArg;
 
   private Q_SLOTS:
-    void onCollectionFetched( KJob *job );
-    void onCollectionModified( KJob *job );
+    void onCollectionFetched(KJob *job);
+    void onCollectionModified(KJob *job);
 };
 
 #endif // RENAMECOMMAND_H
