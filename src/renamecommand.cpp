@@ -21,17 +21,18 @@
 #include "renamecommand.h"
 
 #include <akonadi/collectionmodifyjob.h>
-#include <iostream>
 #include <kcmdlineargs.h>
 #include <klocalizedstring.h>
 
+#include <iostream>
+
 using namespace Akonadi;
 
-RenameCommand::RenameCommand(QObject* parent)
-  : AbstractCommand(parent),
-    mDryRun(false)
+RenameCommand::RenameCommand(QObject *parent)
+    : AbstractCommand(parent),
+      mDryRun(false)
 {
-  mShortHelp = ki18nc("@info:shell", "Rename a collection").toString();
+    mShortHelp = ki18nc("@info:shell", "Rename a collection").toString();
 }
 
 RenameCommand::~RenameCommand()
@@ -39,82 +40,79 @@ RenameCommand::~RenameCommand()
 
 }
 
-void RenameCommand::setupCommandOptions(KCmdLineOptions& options)
+void RenameCommand::setupCommandOptions(KCmdLineOptions &options)
 {
-  AbstractCommand::setupCommandOptions(options);
+    AbstractCommand::setupCommandOptions(options);
 
-  options.add("+collection", ki18nc("@info:shell", "The collection to raname"));
-  options.add("+name", ki18nc("@info:shell", "New name for collection"));
-  options.add(":", ki18nc("@info:shell", "Options"));
-  options.add("n").add("dryrun", ki18nc("@info:shell", "Run command without making any actual changes"));
+    options.add("+collection", ki18nc("@info:shell", "The collection to raname"));
+    options.add("+name", ki18nc("@info:shell", "New name for collection"));
+    options.add(":", ki18nc("@info:shell", "Options"));
+    options.add("n").add("dryrun", ki18nc("@info:shell", "Run command without making any actual changes"));
 }
 
-int RenameCommand::initCommand(KCmdLineArgs* parsedArgs)
+int RenameCommand::initCommand(KCmdLineArgs *parsedArgs)
 {
-  if (parsedArgs->count() < 2) {
-    emitErrorSeeHelp(ki18nc("@info:shell", "No collection specified"));
-    return InvalidUsage;
-  }
-  else if (parsedArgs->count() < 3) {
-    emitErrorSeeHelp(ki18nc("@info:shell", "Please specify a new name for the collection"));
-    return InvalidUsage;
-  }
+    if (parsedArgs->count() < 2) {
+        emitErrorSeeHelp(ki18nc("@info:shell", "No collection specified"));
+        return InvalidUsage;
+    } else if (parsedArgs->count() < 3) {
+        emitErrorSeeHelp(ki18nc("@info:shell", "Please specify a new name for the collection"));
+        return InvalidUsage;
+    }
 
-  mDryRun = parsedArgs->isSet("dryrun");
-  QString oldCollectionNameArg = parsedArgs->arg(1);
-  mNewCollectionNameArg = parsedArgs->arg(2);
+    mDryRun = parsedArgs->isSet("dryrun");
+    QString oldCollectionNameArg = parsedArgs->arg(1);
+    mNewCollectionNameArg = parsedArgs->arg(2);
 
-  mResolveJob = new CollectionResolveJob( oldCollectionNameArg, this );
-  if (!mResolveJob->hasUsableInput()) {
-    emit error( ki18nc( "@info:shell",
-                        "Invalid collection argument '%1', '%2'" )
-                  .subs( oldCollectionNameArg )
-                  .subs( mResolveJob->errorString()).toString() );
-    delete mResolveJob;
-    mResolveJob = 0;
+    mResolveJob = new CollectionResolveJob(oldCollectionNameArg, this);
+    if (!mResolveJob->hasUsableInput()) {
+        emit error( ki18nc( "@info:shell",
+                            "Invalid collection argument '%1', '%2'" )
+                    .subs(oldCollectionNameArg)
+                    .subs(mResolveJob->errorString()).toString());
+        delete mResolveJob;
+        mResolveJob = 0;
 
-    return InvalidUsage;
-  }
+        return InvalidUsage;
+    }
 
-  return NoError;
+    return NoError;
 }
 
 void RenameCommand::start()
 {
-  Q_ASSERT(mResolveJob != 0);
-  connect(mResolveJob, SIGNAL(result(KJob*)), this, SLOT(onCollectionFetched(KJob*)));
-  mResolveJob->start();
+    Q_ASSERT(mResolveJob != 0);
+    connect(mResolveJob, SIGNAL(result(KJob *)), this, SLOT(onCollectionFetched(KJob *)));
+    mResolveJob->start();
 }
 
-void RenameCommand::onCollectionFetched(KJob* job)
+void RenameCommand::onCollectionFetched(KJob *job)
 {
-  if (job->error() != 0) {
-    emit error(job->errorString());
-    emit finished(RuntimeError);
-  }
+    if (job->error() != 0) {
+        emit error(job->errorString());
+        emit finished(RuntimeError);
+    }
 
-  Q_ASSERT(job == mResolveJob && mResolveJob->collection().isValid());
+    Q_ASSERT(job == mResolveJob && mResolveJob->collection().isValid());
 
-  if (!mDryRun) {
-    Collection collection = mResolveJob->collection();
-    collection.setName(mNewCollectionNameArg);
+    if (!mDryRun) {
+        Collection collection = mResolveJob->collection();
+        collection.setName(mNewCollectionNameArg);
 
-    CollectionModifyJob *modifyJob = new CollectionModifyJob(collection);
-    connect(modifyJob, SIGNAL(result(KJob*)), SLOT(onCollectionModified(KJob*)));
-  }
-  else {
-    onCollectionModified(job);
-  }
+        CollectionModifyJob *modifyJob = new CollectionModifyJob(collection);
+        connect(modifyJob, SIGNAL(result(KJob *)), SLOT(onCollectionModified(KJob *)));
+    } else {
+        onCollectionModified(job);
+    }
 }
 
-void RenameCommand::onCollectionModified(KJob* job)
+void RenameCommand::onCollectionModified(KJob *job)
 {
-  if (job->error() != 0) {
-    emit error(job->errorString());
-    emit finished(RuntimeError);
-  }
-  else {
-    std::cout << i18nc("@info:shell", "Collection renamed successfully").toLocal8Bit().data() << std::endl;
-    emit finished(NoError);
-  }
+    if (job->error() != 0) {
+        emit error(job->errorString());
+        emit finished(RuntimeError);
+    } else {
+        std::cout << i18nc("@info:shell", "Collection renamed successfully").toLocal8Bit().data() << std::endl;
+        emit finished(NoError);
+    }
 }

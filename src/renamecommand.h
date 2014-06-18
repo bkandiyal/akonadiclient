@@ -27,27 +27,29 @@ class KJob;
 
 class RenameCommand : public AbstractCommand
 {
-  Q_OBJECT
+    Q_OBJECT
 
-  public:
+public:
     explicit RenameCommand(QObject *parent = 0);
     virtual ~RenameCommand();
 
-    QString name() const { return QLatin1String("rename"); }
+    QString name() const {
+        return QLatin1String("rename");
+    }
 
-  public Q_SLOTS:
+public Q_SLOTS:
     void start();
 
-  protected:
+protected:
     virtual int initCommand(KCmdLineArgs *parsedArgs);
     virtual void setupCommandOptions(KCmdLineOptions &options);
 
-  private:
+private:
     bool mDryRun;
     CollectionResolveJob *mResolveJob;
     QString mNewCollectionNameArg;
 
-  private Q_SLOTS:
+private Q_SLOTS:
     void onCollectionFetched(KJob *job);
     void onCollectionModified(KJob *job);
 };
