@@ -60,6 +60,7 @@ void CopyCommand::start()
 
   connect(mResolveJob, SIGNAL(result(KJob *)), this, SLOT(onTargetFetched(KJob *)));
   mResolveJob->start();
+  qDebug() << "Started copy copying";
 }
 
 
@@ -104,6 +105,7 @@ int CopyCommand::initCommand(KCmdLineArgs *parsedArgs)
     return (InvalidUsage);
   }
 
+  qDebug() << "Destination: "<<mDestinationArg;
   return (NoError);
 }
 
@@ -120,6 +122,7 @@ void CopyCommand::onTargetFetched(KJob *job)
     return;
   }
 
+  qDebug() << "Target fetched";
   Q_ASSERT(job==mResolveJob);
   mDestinationCollection = mResolveJob->collection();
   Q_ASSERT(mDestinationCollection.isValid());
